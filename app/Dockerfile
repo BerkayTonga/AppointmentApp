@@ -16,3 +16,5 @@ COPY . .
 
 # Uygulama başlatma komutunu belirtiyoruz
 CMD ["python", "app.py"]
+
+
