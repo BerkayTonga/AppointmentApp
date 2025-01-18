@@ -1,0 +1,18 @@
+# docker-compose.yml
+
+version: '3.8'
+
+services:
+  app:
+    build: .  # Dockerfile'ın bulunduğu dizin
+    ports:
+      - "8000:8000"  # Uygulama port yönlendirmesi
+    depends_on:
+      - db  # Veritabanına bağımlılık
+  db:
+    image: mysql:8.0  # MySQL 8.0 imajı
+    environment:
+      MYSQL_ROOT_PASSWORD: password  # MySQL root şifresi
+      MYSQL_DATABASE: barber_appointment  # Oluşturulacak veritabanı adı
+    ports:
+      - "3306:3306"  # Veritabanı port yönlendirmesi
