@@ -9,7 +9,7 @@ WORKDIR /app
 # Gereksinim dosyasını kopyalıyoruz
 COPY requirements.txt requirements.txt
 # Gerekli Python kütüphanelerini yüklüyoruz
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Uygulama dosyalarını kopyalıyoruz
 COPY . .
