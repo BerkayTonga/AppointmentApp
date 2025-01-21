@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barber Schedule</title>
+    <link rel="stylesheet" href="/styles.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        .container {
+            margin: 20px auto;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .schedule-table th, .schedule-table td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .schedule-table th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .schedule-table td {
+            background-color: #f9f9f9;
+        }
+
+        .logout-button {
+            align-self: flex-end;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .logout-button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">Barber Schedule</div>
+
+    <div class="container">
+        <table class="schedule-table">
+            <thead>
+                <tr>
+                    <th>Tarih</th>
+                    <th>Saat</th>
+                    <th>Müşteri</th>
+                    <th>Telefon Numarası</th>
+                </tr>
+            </thead>
+            <tbody id="scheduleBody">
+                <!-- Dynamic data will be inserted here -->
+            </tbody>
+        </table>
+
+        <button class="logout-button" onclick="logout()">Çıkış Yap</button>
+    </div>
+
+    <script>
+        const scheduleBody = document.getElementById('scheduleBody');
+
+        // Example data (to be fetched from backend in the future)
+        const scheduleData = [
+            { date: '2025-01-22', time: '10:00', customer: 'Ali Veli', phone: '05555555555' },
+            { date: '2025-01-22', time: '10:30', customer: 'Ayse Yilmaz', phone: '05444444444' },
+            { date: '2025-01-23', time: '11:00', customer: 'Mehmet Kaya', phone: '05333333333' }
+        ];
+
+        function renderSchedule(data) {
+            scheduleBody.innerHTML = '';
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.date}</td>
+                    <td>${item.time}</td>
+                    <td>${item.customer}</td>
+                    <td>${item.phone}</td>
+                `;
+                scheduleBody.appendChild(row);
+            });
+        }
+
+        function logout() {
+            window.location.href = 'index.html';
+        }
+        
+        fetch('/barber-schedule')
+            .then(response => response.json())
+            .then(data => renderSchedule(data.reservations))
+            .catch(err => console.error('Error fetching schedule:', err));
+
+        // Initial render
+        renderSchedule(scheduleData);
+    </script>
+</body>
+</html>

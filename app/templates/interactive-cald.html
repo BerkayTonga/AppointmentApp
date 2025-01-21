@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Takvim</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            width: 90%;
+        }
+
+        .calendar-container {
+            text-align: center;
+            width: 60%;
+        }
+
+        .calendar {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .calendar th,
+        .calendar td {
+            width: 14.28%;
+            height: 100px;
+            border: 1px solid #ccc;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .calendar td:hover {
+            background-color: #e0f7fa;
+        }
+
+        .details-container {
+            width: 40%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .selected-date {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .time-slots {
+            display: none;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .time-slot {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .time-slot:hover {
+            background-color: #0056b3;
+        }
+
+        .time-slots.visible {
+            display: flex;
+        }
+
+        .appointment-details {
+            margin-top: 20px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .appointment-details select,
+        .appointment-details button {
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 80%;
+        }
+
+        .confirmation {
+            margin-top: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .confirmation button {
+            padding: 10px;
+            font-size: 1rem;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .confirm-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+        }
+
+        .confirm-btn:hover {
+            background-color: #218838;
+        }
+
+        .cancel-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+        }
+
+        .cancel-btn:hover {
+            background-color: #c82333;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="calendar-container">
+            <h2>
+                <span class="prev-month" id="prevMonth">&larr;</span>
+                <span id="monthName">Ocak</span>
+                <span class="next-month" id="nextMonth">&rarr;</span>
+            </h2>
+            <table class="calendar" id="calendar">
+                <thead>
+                    <tr>
+                        <th>Pzt</th>
+                        <th>Sal</th>
+                        <th>Çar</th>
+                        <th>Per</th>
+                        <th>Cum</th>
+                        <th>Cmt</th>
+                        <th>Paz</th>
+                    </tr>
+                </thead>
+                <tbody id="calendarBody">
+                    <!-- Days will be rendered dynamically -->
+                </tbody>
+            </table>
+        </div>
+        <div class="details-container">
+            <div class="selected-date" id="selectedDate">Seçilen Tarih: Henüz seçilmedi</div>
+            <div class="time-slots" id="timeSlots"></div>
+
+            <div class="appointment-details" id="appointmentDetails">
+                <select id="serviceSelection">
+                    <option value="Saç Kesimi">Saç Kesimi</option>
+                    <option value="Sakal Kesimi">Sakal Kesimi</option>
+                    <option value="Saç Boyama">Saç Boyama</option>
+                </select>
+                <button id="createAppointment">Randevuyu Oluştur</button>
+            </div>
+
+            <div class="confirmation" id="confirmation">
+                <p id="confirmationMessage"></p>
+                <button class="confirm-btn" id="confirmAppointment">Onayla</button>
+                <button class="cancel-btn" id="cancelAppointment">Reddet</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const timeSlotsContainer = document.getElementById('timeSlots');
+        const selectedDateContainer = document.getElementById('selectedDate');
+        const monthName = document.getElementById('monthName');
+        const nextMonth = document.getElementById('nextMonth');
+        const prevMonth = document.getElementById('prevMonth');
+        const calendarBody = document.getElementById('calendarBody');
+        const appointmentDetails = document.getElementById('appointmentDetails');
+        const serviceSelection = document.getElementById('serviceSelection');
+        const createAppointment = document.getElementById('createAppointment');
+        const confirmation = document.getElementById('confirmation');
+        const confirmationMessage = document.getElementById('confirmationMessage');
+        const confirmAppointment = document.getElementById('confirmAppointment');
+        const cancelAppointment = document.getElementById('cancelAppointment');
+
+        let selectedDate = "";
+        let selectedTime = "";
+        let currentMonthIndex = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+
+        const months = [
+            "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
+        ];
+
+        function getDaysInMonth(month, year) {
+            return new Date(year, month + 1, 0).getDate();
+        }
+
+        function updateNavigationButtons() {
+            prevMonth.style.display = currentMonthIndex === 0 ? 'none' : 'inline';
+            nextMonth.style.display = currentMonthIndex === 11 ? 'none' : 'inline';
+        }
+
+        function renderCalendar(monthIndex, year) {
+            const firstDay = new Date(year, monthIndex, 1).getDay();
+            const daysInMonth = getDaysInMonth(monthIndex, year);
+
+            monthName.textContent = months[monthIndex];
+
+            let daysHTML = "";
+            let dayCounter = 1;
+
+            for (let week = 0; week < 6; week++) {
+                daysHTML += "<tr>";
+                for (let day = 0; day < 7; day++) {
+                    if (week === 0 && day < (firstDay === 0 ? 6 : firstDay - 1) || dayCounter > daysInMonth) {
+                        daysHTML += "<td></td>";
+                    } else {
+                        daysHTML += `<td>${dayCounter}</td>`;
+                        dayCounter++;
+                    }
+                }
+                daysHTML += "</tr>";
+            }
+
+            calendarBody.innerHTML = daysHTML;
+            attachDayClickHandlers();
+            updateNavigationButtons();
+        }
+
+        function attachDayClickHandlers() {
+            document.querySelectorAll(".calendar td").forEach((day) => {
+                day.addEventListener("click", () => {
+                    if (day.textContent.trim() === "") return; // Boş hücrelere tıklanmayı engelle
+
+                    const dayNumber = day.textContent.trim();
+                    selectedDate = `${dayNumber} ${months[currentMonthIndex]} ${currentYear}`;
+                    selectedDateContainer.textContent = `Seçilen Tarih: ${selectedDate}`;
+
+                    timeSlotsContainer.classList.add("visible");
+                    timeSlotsContainer.innerHTML = ""; // Önceki saatler temizlenir
+
+                    // 10:00 - 18:00 arası yarım saatte bir slot oluşturulur
+                    for (let hour = 10; hour < 18; hour++) {
+                        const slot1 = document.createElement("div");
+                        slot1.className = "time-slot";
+                        slot1.textContent = `${hour}:00`;
+                        slot1.addEventListener("click", () => {
+                            selectedTime = slot1.textContent;
+                            appointmentDetails.style.display = "flex";
+                        });
+                        timeSlotsContainer.appendChild(slot1);
+
+                        const slot2 = document.createElement("div");
+                        slot2.className = "time-slot";
+                        slot2.textContent = `${hour}:30`;
+                        slot2.addEventListener("click", () => {
+                            selectedTime = slot2.textContent;
+                            appointmentDetails.style.display = "flex";
+                        });
+                        timeSlotsContainer.appendChild(slot2);
+                    }
+                });
+            });
+        }
+
+        createAppointment.addEventListener("click", () => {
+            const selectedService = serviceSelection.value;
+            confirmationMessage.textContent = `Randevu Bilgileri:\nTarih: ${selectedDate}\nSaat: ${selectedTime}\nİşlem: ${selectedService}`;
+            confirmation.style.display = "block";
+        });
+
+        confirmAppointment.addEventListener("click", () => {
+            alert("Randevu Onaylandı!");
+            confirmation.style.display = "none";
+            appointmentDetails.style.display = "none";
+        });
+
+        cancelAppointment.addEventListener("click", () => {
+            alert("Randevu Reddedildi.");
+            confirmation.style.display = "none";
+            appointmentDetails.style.display = "none";
+        });
+
+        nextMonth.addEventListener("click", () => {
+            currentMonthIndex++;
+            if (currentMonthIndex > 11) {
+                currentMonthIndex = 0;
+                currentYear++;
+            }
+            renderCalendar(currentMonthIndex, currentYear);
+        });
+
+        prevMonth.addEventListener("click", () => {
+            currentMonthIndex--;
+            if (currentMonthIndex < 0) {
+                currentMonthIndex = 11;
+                currentYear--;
+            }
+            renderCalendar(currentMonthIndex, currentYear);
+        });
+
+        renderCalendar(currentMonthIndex, currentYear);
+    </script>
+</body>
+</html>

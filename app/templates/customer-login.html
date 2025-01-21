@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Müşteri Girişi</title>
+    <link rel="stylesheet" href="/styles.css">
+
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Müşteri Girişi</h1>
+        </header>
+        <main>
+            <form action="/login" method="POST" id="loginForm">
+                <div class="form-group">
+                    <label for="email">Mail Adresi:</label>
+                    <input type="email" id="email" name="email" required placeholder="example@domain.com">
+                </div>
+                <div class="form-group">
+                    <label for="password">Şifre:</label>
+                    <input type="password" id="password" name="password" required placeholder="Şifrenizi girin">
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="login-button">Giriş Yap</button>
+                    <button type="button" class="login-button" onclick="goBack()">Geri Dön</button>
+                </div>
+            </form>
+
+            <hr>
+
+            <form action="/register" method="POST" id="registerForm">
+                <div class="form-group">
+                    <label for="firstName">Ad:</label>
+                    <input type="text" id="firstName" name="firstName" required placeholder="Adınız">
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Soyad:</label>
+                    <input type="text" id="lastName" name="lastName" required placeholder="Soyadınız">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Telefon Numarası:</label>
+                    <input type="tel" id="phone" name="phone" required placeholder="05XX-XXX-XXXX">
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Mail Adresi:</label>
+                    <input type="email" id="registerEmail" name="registerEmail" required placeholder="example@domain.com">
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Şifre:</label>
+                    <input type="password" id="registerPassword" name="registerPassword" required placeholder="Şifrenizi girin">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Şifre (Tekrar):</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Şifrenizi tekrar girin">
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="login-button" onclick="validatePassword(event)">Kayıt Ol</button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script>
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+
+        function validatePassword(event) {
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                event.preventDefault();
+                alert('Şifreler eşleşmiyor. Lütfen tekrar deneyin.');
+            }
+        }
+    </script>
+</body>
+</html>
